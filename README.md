@@ -4,6 +4,7 @@
 Hard coded credentials: teste@teste.com | 12345
 
 Credentials were purposely hard coded for testing!
+
 ![Screenshot](screenshots/1.jpg)
 
 
@@ -17,6 +18,7 @@ Credentials were purposely hard coded for testing!
 
 ## android.os classes 
 (Vibrator, Notification, Flashlight)
+
 ![Screenshot](screenshots/4.jpg)
 
 
