@@ -1,4 +1,3 @@
-
 from kivymd.uix.button import MDFlatButton, MDRaisedButton
 from kivymd.uix.screenmanager import MDScreenManager
 from kivymd.uix.boxlayout import MDBoxLayout
@@ -9,9 +8,11 @@ from kivy.core.window import Window
 from kivy.utils import platform
 from kivymd.app import MDApp
 from kivy.clock import Clock
+from datetime import datetime
 from plyer import notification
 from plyer import vibrator
 from plyer import flash
+import requests
 import json
 import re
 
@@ -45,18 +46,22 @@ class Login(MDScreen):
 
 
 class Tarefas(MDScreen):
+    url = '' #Firebase URL
+    auth_key = '' #Firebase Auth Key
     dialog = None
-    tarefas = []
     path = ''
 
     #Botão voltar (Android) / ESC
     def on_pre_enter(self):
         self.ids.box.clear_widgets()
         self.path = MDApp.get_running_app().user_data_dir+'/'
-        self.loadData()
         Window.bind(on_keyboard=self.voltar)
-        for tarefa in self.tarefas:
-            self.ids.box.add_widget(Tarefa(text=tarefa))
+        #Firebase
+        request = requests.get(self.url + '?auth=' + self.auth_key)
+        JSON = request.json()
+        for key in list(JSON.keys()):
+            #Add widget
+            self.ids.box.add_widget(Tarefa(text=key))
 
     def voltar(self, window, key, *args):
         if key == 27:
@@ -65,39 +70,36 @@ class Tarefas(MDScreen):
 
     def on_pre_leave(self):
         Window.unbind(on_keyboard=self.voltar)
-    
-    def saveData(self, *args):
-        with open(self.path+'data.json', 'w') as data:
-            json.dump(self.tarefas,data)
-
-    def loadData(self, *args):
-        try:
-            with open(self.path+'data.json', 'r') as data:
-                self.tarefas = json.load(data)
-                Tarefa.loadData(self=Tarefa)
-        except FileNotFoundError:
-            pass
 
     #Adicionar Tarefa
     def addWidget(self):
         texto = self.ids.texto.text
         if not (texto.isspace() or texto == '') and (len(texto) <= 20):
+            #Add Widget
             self.ids.box.add_widget(Tarefa(text=texto))
+            #Firebase
+            JSON = {texto:{"date":datetime.today().strftime('%Y-%m-%d %H:%M:%S')}}
+            JSON = json.dumps(JSON)
+            to_database = json.loads(JSON)
+            requests.patch(url=self.url, json=to_database)   
+            #Clear text input
             self.ids.texto.text = ''
-            self.tarefas.append(texto)
-            self.saveData()
-            Tarefa.loadData(self=Tarefa)      
         elif (len(texto) > 20) and not (texto.isspace()):
             Todo.aviso(texto='Seu texto não pode ter mais que 20 caracteres.')
             self.ids.texto.text = ''          
         else:
             Todo.aviso(texto='Você precisa escrever alguma coisa!')
-            self.ids.texto.text = ''         
+            self.ids.texto.text = ''  
+    
+    def delete(self, texto):
+        #Firebase
+        JSON = f'{texto}/date'
+        requests.delete(url=self.url[:-5]+JSON+".json")
+            
 
 
 class Tarefa(MDBoxLayout):
     dialog = None
-    tarefas = []
     path = ''
 
     #Gerar tarefa
@@ -120,26 +122,15 @@ class Tarefa(MDBoxLayout):
                         on_release=self.delete),],)
         self.dialog.open()
 
-    def saveData(self, *args):
-        self.path = MDApp.get_running_app().user_data_dir+'/'
-        with open(self.path+'data.json', 'w') as data:
-            json.dump(self.tarefas,data)
-
-    def loadData(self, *args):
-        self.path = MDApp.get_running_app().user_data_dir+'/'
-        try:
-            with open(self.path+'data.json', 'r') as data:
-                self.tarefas = json.load(data)
-        except FileNotFoundError:
-            pass
-
     def delete(self, *args):
         app = MDApp.get_running_app()
+        #Firebase
+        texto = self.ids.label.text
+        Tarefas.delete(Tarefas, texto)
+        #Remove Widget
         app.root.get_screen('tarefas').ids.box.remove_widget(self)
         self.dialog.dismiss()
-        self.tarefas.remove(self.ids.label.text)
-        self.saveData()
-        
+
 
 class Ferramentas(MDScreen):
     flashlight_status = 0
