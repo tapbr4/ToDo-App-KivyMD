@@ -1,0 +1,213 @@
+#:kivy 2.1.0
+#:import hex kivy.utils.get_color_from_hex
+
+<Gerenciador>:
+    Login:
+        name:'login'
+    Menu:
+        name:'menu'
+    Tarefas:
+        name:'tarefas'
+    Ferramentas:
+        name:'ferramentas'
+
+<Login>:
+    MDCard:
+        orientation: 'vertical'
+        size_hint: 1,1
+        pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+        padding:root.width*0.08
+        spacing:'20sp'
+        Image:
+            source:'images/logo.png'
+            pos_hint: {'top': 1}
+            size_hint:1,None
+            height:root.width*0.5
+            allow_stretch:True   
+        MDTextField:
+            id:user
+            mode:'round'
+            hint_text:'username'
+            icon_right:'account'
+            size_hint_x:None
+            width:root.width*0.9
+            font_size:'12sp'
+            pos_hint: {'center_x':0.5}
+        MDTextField:
+            id:password
+            mode:'round'
+            hint_text:'password'
+            icon_right:'eye-off'
+            size_hint_x:None
+            width:root.width*0.9
+            font_size:'12sp'
+            pos_hint: {'center_x':0.5}
+            password:True
+        MDRaisedButton:
+            mode:"round"
+            text:'Entrar'
+            pos_hint:{'center_x':0.5}
+            on_release:root.logar()
+            #app.root.current='menu' if root.ids.user.text == 'teste@teste.com'
+        MDFlatButton:
+            text:'Registrar'
+            pos_hint:{'center_x':0.5}
+        Widget:
+            size_hint_y:None
+            height:root.width*0.40
+
+
+<Menu>:
+    MDBoxLayout:
+        orientation:'vertical'
+        padding: root.width*0.25, root.height*0.1
+        spacing:'30dp'
+        canvas:
+            Color:
+                rgba:hex('#64447c')
+            Rectangle:
+                size:self.size
+                pos:self.pos
+        Image:
+            source:'images/logo.png'
+            size_hint_y:4
+            allow_stretch:True
+        Botao:
+            text:'Tarefas'
+            color:0,0,0,1
+            bold:True
+            on_release:app.root.current='tarefas'
+        Botao:
+            text:'Ferramentas'
+            bold:True
+            color:0,0,0,1
+            on_release:app.root.current='ferramentas'
+        Botao:
+            text:'Sair'
+            color:0,0,0,1
+            bold:True
+            on_release:app.root.current='login'
+
+
+<Botao@ButtonBehavior+Label>:
+    canvas.before:
+        Color:
+            rgba:hex('#dbc1f5') if self.state == 'normal' else hex('#CC98FF')
+        Ellipse:
+            pos:self.pos
+            size:self.height,self.height
+        Ellipse:
+            pos:self.x+self.width-self.height,self.y
+            size:self.height,self.height
+        Rectangle:
+            pos:self.x+self.height/2.0,self.y
+            size:self.width-self.height,self.height
+    
+
+<Tarefas>:
+    MDBoxLayout:
+        orientation:'vertical'
+        TopBar:
+            title:'Tarefas'
+        MDScrollView:
+            MDBoxLayout:
+                id:box 
+                orientation:'vertical'
+                size_hint_y:None
+                height:self.minimum_height
+        MDBoxLayout:
+            padding:'10dp'
+            size_hint_y:None
+            height:'40sp'
+            MDTextField:
+                id:texto
+                hint_text: "Escreva uma tarefa aqui..."
+                max_text_length:20
+                size_hint_y: None
+                padding:'5dp'
+                height:60
+            MDRaisedButton:
+                text:'+'
+                bold:True
+                size_hint: None,None
+                background_color:hex('#dbc1f5')
+                on_release:root.addWidget()
+
+<Tarefa>:
+    size_hint_y:None
+    height:'65sp'
+    haling:'center'
+    Label:
+        id:label
+        bold:True
+        font_size:'20sp'
+        color: (0,0,0,1) if app.theme_cls.theme_style == 'Light' else (1,1,1,1)
+    MDIconButton:
+        icon:'delete'
+        icon_size: "50sp"
+        theme_icon_color: "Custom"
+        icon_color: app.theme_cls.primary_color
+        size_hint_x:None
+        halign:'center'
+        on_release:root.show_alert_dialog()
+    
+<Ferramentas>:
+    MDBoxLayout:
+        orientation:'vertical'
+        TopBar:
+            title:'Ferramentas'
+        MDBottomNavigation:
+            MDBottomNavigationItem:
+                name: "Vibrate"
+                icon: 'vibrate'
+                text: 'Vibrate'
+                MDIconButton:
+                    id:vibratebutton
+                    icon:'vibrate-off'
+                    icon_size: "100sp"
+                    theme_icon_color: "Custom"
+                    icon_color: hex('#696969')
+                    pos_hint: {"center_x": .5, "center_y": .5}
+                    on_release: root.vibrator_on()
+            MDBottomNavigationItem:
+                name: "notification"
+                icon: 'bell-badge'
+                text: 'Notification'
+                MDIconButton:
+                    icon:'message-badge'
+                    icon_size: "100sp"
+                    theme_icon_color: "Custom"
+                    icon_color: app.theme_cls.primary_color
+                    pos_hint: {"center_x": .5, "center_y": .5}
+                MDBoxLayout:
+                    padding:10
+                    MDTextField:
+                        id:texto
+                        hint_text: "Escreva uma mensagem aqui..."
+                        max_text_length:50
+                        size_hint_y: None
+                        padding:'5dp'
+                        height:60
+                    MDRaisedButton:
+                        text:'Enviar'
+                        bold:True
+                        background_color:hex('#dbc1f5')
+                        on_release:root.send_notification()
+            MDBottomNavigationItem:
+                name: "flashlight"
+                icon: 'lightbulb-outline'
+                text: 'Flashlight'
+                MDIconButton:
+                    id:flashbutton
+                    icon:'flashlight-off'
+                    icon_size: "100sp"
+                    theme_icon_color: "Custom"
+                    icon_color: hex('#696969')
+                    pos_hint: {"center_x": .5, "center_y": .5}
+                    on_release: root.flashlight()
+
+
+<TopBar@MDTopAppBar>:
+    left_action_items: [['arrow-left', lambda x: app.set_screen('menu')]]
+    right_action_items: [['brightness-4', lambda x: app.switch_theme_style()]]
+          
