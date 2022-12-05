@@ -1,9 +1,9 @@
 # ToDo-App-KivyMD
 
 ## Login Screen
-###Hard coded credentials: teste@teste.com | 12345
+Hard coded credentials: teste@teste.com | 12345
 
-###Credentials were purposely hard coded for testing!
+Credentials were purposely hard coded for testing!
 ![Screenshot](screenshots/1.jpg)
 
 
@@ -16,7 +16,7 @@
 
 
 ## android.os classes 
-###(Vibrator, Notification, Flashlight)
+(Vibrator, Notification, Flashlight)
 ![Screenshot](screenshots/4.jpg)
 
 
